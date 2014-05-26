@@ -86,6 +86,36 @@ for each entry and merging its results into the Entities object which can be
 treated as a hash.  Given that it runs `do FILE`, each config node is a fully
 capable perl script.
 
+# CONSTRUCTORS
+
+## new( $entities\_root\_dir \[, $entities\_root\_dir, ...\] \\%options )
+
+Recurses into each `$entities_root_dir` loading its contents into the entities
+map.  The filesystem structure will be propagated to the map, each sub folder
+representing a sub hash.  If both `Xxx.pm` and a folder `Xxx` are found, the
+`Xxx.pm` will be loaded first then the recursion will enter `Xxx` and merge 
+its results over the top of what is already in the map.  If properties are
+provided via `properties` or `properties_file`, they can be accessed using
+`Config::Entities::properties` in the individual config files.  The currently 
+available options are:
+
+- properties
+
+    Properties to be loaded into `Config::Entities::properties`.  Will override any
+    properties with the same name loaded by properties\_file.
+
+- properties\_file
+
+    A file that will be loaded into `Config::Entities::properties` using `do FILE`
+
+# METHODS
+
+## get\_entity( $coordinate )
+
+A simple dotted notation for indexing into the map.  For example, 
+`$entities-`get\_entity( 'a.b.c' )> is equivalent to 
+`$entities-`{a}{b}{c}.
+
 # AUTHOR
 
 Lucas Theisen <lucastheisen@pastdev.com>

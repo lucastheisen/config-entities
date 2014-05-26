@@ -179,4 +179,32 @@ for each entry and merging its results into the Entities object which can be
 treated as a hash.  Given that it runs C<do FILE>, each config node is a fully
 capable perl script.
 
+=constructor new( $entities_root_dir [, $entities_root_dir, ...] \%options )
 
+Recurses into each C<$entities_root_dir> loading its contents into the entities
+map.  The filesystem structure will be propagated to the map, each sub folder
+representing a sub hash.  If both C<Xxx.pm> and a folder C<Xxx> are found, the
+C<Xxx.pm> will be loaded first then the recursion will enter C<Xxx> and merge 
+its results over the top of what is already in the map.  If properties are
+provided via C<properties> or C<properties_file>, they can be accessed using
+C<Config::Entities::properties> in the individual config files.  The currently 
+available options are:
+
+=over 4
+
+=item properties
+
+Properties to be loaded into C<Config::Entities::properties>.  Will override any
+properties with the same name loaded by properties_file.
+
+=item properties_file
+
+A file that will be loaded into C<Config::Entities::properties> using C<do FILE>
+
+=back
+
+=method get_entity( $coordinate )
+
+A simple dotted notation for indexing into the map.  For example, 
+C<$entities->get_entity( 'a.b.c' )> is equivalent to 
+C<$entities->{a}{b}{c}.
