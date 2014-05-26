@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 BEGIN { use_ok( 'Config::Entities' ) }
 
@@ -102,3 +102,20 @@ is_deeply( $entities,
         }
     },
     'entities and local_entity with properties file and properties' );
+
+$entities = Config::Entities->new( 
+    "$test_dir/entities", 
+    "$test_dir/local_entities", 
+    { 
+        properties_file => "$test_dir/config.pl",
+        properties => { username => 'override_user' }
+    } );
+is_deeply( $entities->get_entity( 'd.g.j' ),
+    {
+        k => {
+            l => {
+                m => 'jkl'
+            }
+        }
+    },
+    'get_entity' );

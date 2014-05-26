@@ -18,6 +18,17 @@ sub new {
     return bless( {}, $class )->_init( @args );
 }
 
+sub get_entity {
+    my ($self, $coordinate) = @_;
+    
+    my $result = $self;
+    foreach my $coordinate_part ( split( /\./, $coordinate ) ) {
+        $result = $result->{$coordinate_part};
+        return if ( ! $result );
+    }
+    return $result;
+}
+
 sub _init {
     my ($self, @args) = @_;
 
