@@ -18,15 +18,37 @@ sub new {
     return bless( {}, $class )->_init( @args );
 }
 
-sub get_entity {
-    my ($self, $coordinate) = @_;
+sub fill {
+    my ($self, $coordinate, $hashref, %options) = @_;
     
-    my $result = $self;
-    foreach my $coordinate_part ( split( /\./, $coordinate ) ) {
-        $result = $result->{$coordinate_part};
-        return if ( ! $result );
+    my @entity = $self->get_entity( $coordinate, %options );
+    foreach my $key ( keys( %$hashref ) ) {
+        if ( defined( $entity[0]->{$key} ) ) {
+            $hashref->{$key} = $entity[0]->{$key};
+        }
+        elsif ( $options{ancestry} ) {
+            for ( my $index = 1; $index < scalar( @entity ); $index++ ) {
+                if ( defined( $entity[$index]->{$key} ) ) {
+                    $hashref->{$key} = $entity[$index]->{$key};
+                    last;
+                }
+            }
+        }
     }
-    return $result;
+    
+    return $hashref;
+}
+
+sub get_entity {
+    my ($self, $coordinate, %options) = @_;
+    
+    my @result = ($self);
+    foreach my $coordinate_part ( split( /\./, $coordinate ) ) {
+        my $child = $result[0]->{$coordinate_part};
+        return if ( ! $child );
+        unshift( @result, $child );
+    }
+    return $options{ancestry} ? @result : shift( @result );
 }
 
 sub _init {

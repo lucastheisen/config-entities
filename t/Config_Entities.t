@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 BEGIN { use_ok( 'Config::Entities' ) }
 
@@ -119,3 +119,20 @@ is_deeply( $entities->get_entity( 'd.g.j' ),
         }
     },
     'get_entity' );
+
+$entities = Config::Entities->new( 
+    "$test_dir/entities", 
+    "$test_dir/local_entities", 
+    { 
+        properties_file => "$test_dir/config.pl",
+        properties => { username => 'override_user' }
+    } );
+my $hashref = $entities->fill( 'd.g.j.k.l', {h=>undef,i=>undef,m=>undef}, ancestry => 1 );
+is_deeply( $hashref,
+    {
+        h => 'abc',
+        i => 'ghi',
+        m => 'jkl'
+    },
+    'fill' );
+    
