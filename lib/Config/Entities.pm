@@ -137,7 +137,6 @@ __END__
     # |_______________________/c
     # |_________________________/d.pm
     # | { i => 'j' };
-
     my $entities = Config::Entities->new( '/project/config/entities' );
     my $abe = $entities->{a}{b}{e};    # 'f'
     my $ab = $entities->{a}{b};        # '{e=>'f'}
@@ -156,7 +155,6 @@ __END__
     # |     file => $Config::Entities::properties->{base_folder}
     # |         . '/sub/folder/file.txt'
     # | }
-
     my $entities = Config::Entities->new( '/project/config/entities',
         { properties => { base_folder => '/project' } } );
     my $file = $entities->{a}{file}; # /project/sub/folder/file.txt
@@ -172,7 +170,6 @@ __END__
     # |______________/more_entities
     # |____________________________/d.pm
     # | { e => $Config::Entities::properties->{f} } 
-    
     my $entities = Config::Entities->new( 
         '/project/config/entities',
         '/project/config/more_entities',
@@ -188,11 +185,33 @@ __END__
     # |
     # |______________/properties.pl
     # | { e => 'f' } 
-
     my $entities = Config::Entities->new( 
         '/project/config/entities',
         { properties_file => '/project/config/properties.pl } );
     my $ab = $entities->{a}{b}; # 'f'
+    
+    # Assuming:
+    #
+    # {
+    #     a => {
+    #         b => {
+    #             c => 'd',
+    #             e => 'f'
+    #         },
+    #         g => 'h'
+    #     }       
+    # }
+    #
+    # You can use dotted notation to refer to entities using get_entity
+    my $ab = $entities->get_entity( 'a.b' );    # {c=>'d',e=>'f'}
+    # You can fill a hash with many values at once using fill
+    my $ab_abc_abe = $entities->fill( 'a.b', 
+        {c=>undef, e=>undef} );                 # {c=>'d',e=>'f'}
+    # Perhaps the most useful approach is filling a hash from a coordinate
+    # or its parents
+    my $ab_abc_abe_ag = $entities->fill( 'a.b',
+        {c=>undef, e=>undef, g=>undef}, 
+        ancestry => 1 );                        # {c=>'d',e=>'f',g=>'h'}
 
 =head1 DESCRIPTION
 
@@ -225,8 +244,31 @@ A file that will be loaded into C<Config::Entities::properties> using C<do FILE>
 
 =back
 
-=method get_entity( $coordinate )
+=method fill( $coordinate, $hashref, [%options] )
+
+Will iterate through the keys of C<$hashref> setting the associated value to the
+value found at the same key in the entity matching C<$coordinate>.  The 
+currently available options are:
+
+=over 4
+
+=item ancestry
+
+If true, the search will continue up the ancestry until it finds a match.
+
+=back
+
+=method get_entity( $coordinate, [%options] )
 
 A simple dotted notation for indexing into the map.  For example, 
 C<$entities->get_entity( 'a.b.c' )> is equivalent to 
-C<$entities->{a}{b}{c}.
+C<$entities->{a}{b}{c}.  The currently available options are:
+
+=over 4
+
+=item ancestry
+
+If true, a list will be returned where the first element is the matching entity, 
+and each successive entity is its parent, all the way up to C<$self>.
+
+=back

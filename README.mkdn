@@ -23,7 +23,6 @@ version 0.01
     # |_______________________/c
     # |_________________________/d.pm
     # | { i => 'j' };
-
     my $entities = Config::Entities->new( '/project/config/entities' );
     my $abe = $entities->{a}{b}{e};    # 'f'
     my $ab = $entities->{a}{b};        # '{e=>'f'}
@@ -42,7 +41,6 @@ version 0.01
     # |     file => $Config::Entities::properties->{base_folder}
     # |         . '/sub/folder/file.txt'
     # | }
-
     my $entities = Config::Entities->new( '/project/config/entities',
         { properties => { base_folder => '/project' } } );
     my $file = $entities->{a}{file}; # /project/sub/folder/file.txt
@@ -58,7 +56,6 @@ version 0.01
     # |______________/more_entities
     # |____________________________/d.pm
     # | { e => $Config::Entities::properties->{f} } 
-    
     my $entities = Config::Entities->new( 
         '/project/config/entities',
         '/project/config/more_entities',
@@ -78,6 +75,29 @@ version 0.01
         '/project/config/entities',
         { properties_file => '/project/config/properties.pl } );
     my $ab = $entities->{a}{b}; # 'f'
+    
+    # Assuming:
+    #
+    # {
+    #     a => {
+    #         b => {
+    #             c => 'd',
+    #             e => 'f'
+    #         },
+    #         g => 'h'
+    #     }       
+    # }
+    #
+    # You can use dotted notation to refer to entities using get_entity
+    my $ab = $entities->get_entity( 'a.b' );    # {c=>'d',e=>'f'}
+    # You can fill a hash with many values at once using fill
+    my $ab_abc_abe = $entities->fill( 'a.b', 
+        {c=>undef, e=>undef} );                 # {c=>'d',e=>'f'}
+    # Perhaps the most useful approach is filling a hash from a coordinate
+    # or its parents
+    my $ab_abc_abe_ag = $entities->fill( 'a.b',
+        {c=>undef, e=>undef, g=>undef}, 
+        ancestry => 1 );                        # {c=>'d',e=>'f',g=>'h'}
 
 # DESCRIPTION
 
@@ -110,11 +130,26 @@ available options are:
 
 # METHODS
 
-## get\_entity( $coordinate )
+## fill( $coordinate, $hashref, \[%options\] )
+
+Will iterate through the keys of `$hashref` setting the associated value to the
+value found at the same key in the entity matching `$coordinate`.  The 
+currently available options are:
+
+- ancestry
+
+    If true, the search will continue up the ancestry until it finds a match.
+
+## get\_entity( $coordinate, \[%options\] )
 
 A simple dotted notation for indexing into the map.  For example, 
 `$entities-`get\_entity( 'a.b.c' )> is equivalent to 
-`$entities-`{a}{b}{c}.
+`$entities-`{a}{b}{c}.  The currently available options are:
+
+- ancestry
+
+    If true, a list will be returned where the first element is the matching entity, 
+    and each successive entity is its parent, all the way up to `$self`.
 
 # AUTHOR
 
