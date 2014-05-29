@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 BEGIN { use_ok( 'Config::Entities' ) }
 
@@ -12,7 +12,7 @@ use File::Spec;
 
 my $test_dir = dirname( File::Spec->rel2abs( $0 ) );
 
-my $entities;
+my ($entities, $hashref);
 ok( $entities = Config::Entities->new(), 'no entities dirs' );
 
 is_deeply( Config::Entities->new( "$test_dir/local_entities" ),
@@ -127,12 +127,28 @@ $entities = Config::Entities->new(
         properties_file => "$test_dir/config.pl",
         properties => { username => 'override_user' }
     } );
-my $hashref = $entities->fill( 'd.g.j.k.l', {h=>undef,i=>undef,m=>undef}, ancestry => 1 );
+$hashref = $entities->fill( 'd.g.j.k.l', {h=>undef,i=>undef,m=>undef}, ancestry => 1 );
 is_deeply( $hashref,
     {
         h => 'abc',
         i => 'ghi',
         m => 'jkl'
     },
-    'fill' );
+    'fill hashref coordinate with ancestry' );
+    
+
+$entities = Config::Entities->new( 
+    "$test_dir/entities", 
+    "$test_dir/local_entities", 
+    { 
+        properties_file => "$test_dir/config.pl",
+        properties => { username => 'override_user' }
+    } );
+$hashref = $entities->fill( 'd.g.j.k.l.m', {h=>undef,i=>undef}, ancestry => 1 );
+is_deeply( $hashref,
+    {
+        h => 'abc',
+        i => 'ghi'
+    },
+    'fill non-hashref coordinate with ancestry' );
     

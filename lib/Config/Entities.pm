@@ -23,7 +23,7 @@ sub fill {
     
     my @entity = $self->get_entity( $coordinate, %options );
     foreach my $key ( keys( %$hashref ) ) {
-        if ( defined( $entity[0]->{$key} ) ) {
+        if ( ref( $entity[0] ) eq 'HASH' && defined( $entity[0]->{$key} ) ) {
             $hashref->{$key} = $entity[0]->{$key};
         }
         elsif ( $options{ancestry} ) {
