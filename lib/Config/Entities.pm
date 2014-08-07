@@ -104,7 +104,26 @@ sub _init {
             map { Cwd::abs_path( $_ ) } @entities_roots );
     }
 
+    _inherit( undef, $self );
+
     return $self;
+}
+
+sub _inherit {
+    my ($parent, $child) = @_;
+    if ( $child && (ref( $child ) eq 'HASH' || ref( $child ) eq 'Config::Entities') ) {
+        if ( $parent && $child->{'Config::Entities::inherit'} ) {
+            my $inherit = delete( $child->{'Config::Entities::inherit'} );
+            if ( $inherit ) {
+                foreach my $key ( @$inherit ) {
+                    if ( defined( $parent->{$key} ) ) {
+                        $child->{$key} = $parent->{$key} unless ( defined( $child->{$key} ) );
+                    }
+                }
+            }
+        }
+        _inherit( $child, $child->{$_} ) foreach keys( %$child );
+    }
 }
 
 sub _merge {

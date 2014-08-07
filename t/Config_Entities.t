@@ -92,6 +92,7 @@ is_deeply( $entities,
                 h => 'abc',
                 i => 'ghi',
                 j => {
+                    i => 'ghi',
                     k => {
                         l => {
                             m => 'jkl'
@@ -112,6 +113,7 @@ $entities = Config::Entities->new(
     } );
 is_deeply( $entities->get_entity( 'd.g.j' ),
     {
+        i => 'ghi',
         k => {
             l => {
                 m => 'jkl'
