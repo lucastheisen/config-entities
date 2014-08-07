@@ -10,6 +10,9 @@ use Cwd qw(abs_path);
 use Data::Dumper;
 use File::Find;
 use File::Spec;
+use Log::Any;
+
+my $logger = Log::Any->get_logger();
 
 our $properties = {};
 
@@ -93,6 +96,8 @@ sub _init {
                     }
                     
                     my $required = do( $File::Find::name );
+                    $logger->warn( 'unable to compile ', $File::Find::name, ': ', $@, "\n" )
+                        if ( $@ );
                     if ( ref( $required ) eq 'HASH' ) {
                         # transfer key/value pairs from hashref
                         # will merge rather than replace...
