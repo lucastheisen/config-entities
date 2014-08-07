@@ -95,31 +95,37 @@ sub _init {
                         }
                     }
                     
-                    my $required = do( $File::Find::name );
+                    my $entity = do( $File::Find::name );
                     $logger->warn( 'unable to compile ', $File::Find::name, ': ', $@, "\n" )
                         if ( $@ );
-                    if ( ref( $required ) eq 'HASH' ) {
-                        # transfer key/value pairs from hashref
-                        # will merge rather than replace...
-                        if ( ! defined( $hashref->{$key} ) ) {
-                            $hashref->{$key} = {};
-                        }
-                        $hashref = $hashref->{$key};
-                    
-                        while ( my ($sub_key, $value) = each( %$required ) ) {
-                            $hashref->{$sub_key} = $value;
-                        }
-                    }
-                    else {
-                        # anything not a hashref will replace
-                        $hashref->{$key} = $required;
-                    }
+                    _merge( $hashref, $key, $entity );
                 }
             }, 
             map { Cwd::abs_path( $_ ) } @entities_roots );
     }
 
     return $self;
+}
+
+sub _merge {
+    my ($hashref, $key, $value) = @_;
+
+    if ( ref( $value ) eq 'HASH' ) {
+        # transfer key/value pairs from hashref
+        # will merge rather than replace...
+        if ( ! defined( $hashref->{$key} ) ) {
+            $hashref->{$key} = {};
+        }
+        $hashref = $hashref->{$key};
+    
+        while ( my ($sub_key, $sub_value) = each( %$value ) ) {
+            _merge( $hashref, $sub_key, $sub_value );
+        }
+    }
+    else {
+        # anything not a hashref will replace
+        $hashref->{$key} = $value;
+    }
 }
 
 1;
