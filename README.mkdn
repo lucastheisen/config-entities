@@ -4,7 +4,7 @@ Config::Entities - An multi-level overridable perl based configuration module
 
 # VERSION
 
-version 0.03
+version 1.00
 
 # SYNOPSIS
 
@@ -118,6 +118,11 @@ its results over the top of what is already in the map.  If properties are
 provided via `properties` or `properties_file`, they can be accessed using
 `Config::Entities::properties` in the individual config files.  The currently 
 available options are:
+
+- entity
+
+    A hashref containing configuration.  Will be overriden by the contents of any
+    `$entities_root_dir`'s that are passed in.
 
 - properties
 
