@@ -1,5 +1,8 @@
 Revision history for Perl module Template::Resolver
 
+1.01 2016-01-23
+    - Added support for fill with 'Config::Entities::entity'
+
 1.00 2016-01-23
     - Add entity option allowing import of hashref as base entity
 

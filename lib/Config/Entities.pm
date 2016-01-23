@@ -29,6 +29,9 @@ sub fill {
         if ( ref( $entity[0] ) eq 'HASH' && defined( $entity[0]->{$key} ) ) {
             $hashref->{$key} = $entity[0]->{$key};
         }
+        elsif ( $hashref->{$key} && $hashref->{$key} eq 'Config::Entities::entity' ) {
+            $hashref->{$key} = $entity[0];
+        }
         elsif ( $options{ancestry} ) {
             for ( my $index = 1; $index < scalar( @entity ); $index++ ) {
                 if ( defined( $entity[$index]->{$key} ) ) {
@@ -288,8 +291,10 @@ A file that will be loaded into C<Config::Entities::properties> using C<do FILE>
 =method fill( $coordinate, $hashref, [%options] )
 
 Will iterate through the keys of C<$hashref> setting the associated value to the
-value found at the same key in the entity matching C<$coordinate>.  The 
-currently available options are:
+value found at the same key in the entity matching C<$coordinate>.  If the 
+supplied C<$hashref> has a key whose value is C<'Config::Entities::entity'> and
+the key is not found in the entity at C<$coordinate> the value in C<$hashref> 
+will be set to the entity itself.  The currently available options are:
 
 =over 4
 

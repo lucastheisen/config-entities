@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 11;
+use Test::More tests => 13;
 
 BEGIN { use_ok( 'Config::Entities' ) }
 
@@ -164,3 +164,28 @@ is_deeply( $entities,
         }
     },
     'supply entities hash' );
+    
+$entities = Config::Entities->new({entity => 
+    {
+        sudo_username => 'apache', 
+        logs => {
+            access => '/var/log/httpd/access_log', 
+            catalina => {
+                file => '/opt/apache/tomcat/logs/catalina.out',
+                sudo_username => 'tomcat'
+            }
+        }
+    }
+});
+is_deeply( 
+    $entities->fill( 'logs.catalina', 
+        {file => 'Config::Entities::entity', sudo_username => undef}, 
+        ancestry => 1 ),
+    {file => '/opt/apache/tomcat/logs/catalina.out', sudo_username => 'tomcat'},
+    'full config of catalina.out' );
+is_deeply( 
+    $entities->fill( 'logs.access', 
+        {file => 'Config::Entities::entity', sudo_username => undef}, 
+        ancestry => 1 ),
+    {file => '/var/log/httpd/access_log', sudo_username => 'apache'},
+    'inherit sudo_username' );
