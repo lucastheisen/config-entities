@@ -4,7 +4,7 @@ Config::Entities - An multi-level overridable perl based configuration module
 
 # VERSION
 
-version 1.00
+version 1.01
 
 # SYNOPSIS
 
@@ -138,8 +138,10 @@ available options are:
 ## fill( $coordinate, $hashref, \[%options\] )
 
 Will iterate through the keys of `$hashref` setting the associated value to the
-value found at the same key in the entity matching `$coordinate`.  The 
-currently available options are:
+value found at the same key in the entity matching `$coordinate`.  If the 
+supplied `$hashref` has a key whose value is `'Config::Entities::entity'` and
+the key is not found in the entity at `$coordinate` the value in `$hashref` 
+will be set to the entity itself.  The currently available options are:
 
 - ancestry
 
