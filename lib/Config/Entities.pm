@@ -75,6 +75,12 @@ sub _init {
             $properties->{$key} = $options->{properties}{$key};
         }
     }
+
+    if ( $options->{entity} ) {
+        foreach my $key ( keys( %{$options->{entity}} ) ) {
+            _merge( $self, $key, $options->{entity}{$key} );
+        }
+    }
     
     if ( scalar( @entities_roots ) ) {
         find( 
@@ -262,6 +268,11 @@ C<Config::Entities::properties> in the individual config files.  The currently
 available options are:
 
 =over 4
+
+=item entity
+
+A hashref containing configuration.  Will be overriden by the contents of any
+C<$entities_root_dir>'s that are passed in.
 
 =item properties
 

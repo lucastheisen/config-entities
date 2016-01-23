@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 BEGIN { use_ok( 'Config::Entities' ) }
 
@@ -154,3 +154,13 @@ is_deeply( $hashref,
     },
     'fill non-hashref coordinate with ancestry' );
     
+$entities = Config::Entities->new({entity => {a => 1, b => {c => 2, d => 3}}});
+is_deeply( $entities,
+    {
+        a => 1,
+        b => {
+            c => 2,
+            d => 3
+        }
+    },
+    'supply entities hash' );
