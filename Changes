@@ -1,5 +1,8 @@
 Revision history for Perl module Template::Resolver
 
+1.02 2016-01-23
+    - Fixed bug allowing undef of parent when using fill and ancestry
+
 1.01 2016-01-23
     - Added support for fill with 'Config::Entities::entity'
 

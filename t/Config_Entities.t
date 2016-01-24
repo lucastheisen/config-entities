@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 13;
+use Test::More tests => 15;
 
 BEGIN { use_ok( 'Config::Entities' ) }
 
@@ -173,10 +173,22 @@ $entities = Config::Entities->new({entity =>
             catalina => {
                 file => '/opt/apache/tomcat/logs/catalina.out',
                 sudo_username => 'tomcat'
+            },
+            error => {
+                file => '/var/log/httpd/error_log',
+                sudo_username => undef
             }
         }
     }
 });
+ok(exists($entities->get_entity('logs.error')->{sudo_username}),
+    'undef sudo_username');
+is_deeply(
+    $entities->fill( 'logs.error', 
+        {file => 'Config::Entities::entity', sudo_username => undef}, 
+        ancestry => 1 ),
+    {file => '/var/log/httpd/error_log', sudo_username => undef},
+    'undef sudo_username in fill' );
 is_deeply( 
     $entities->fill( 'logs.catalina', 
         {file => 'Config::Entities::entity', sudo_username => undef}, 

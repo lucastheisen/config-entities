@@ -26,7 +26,7 @@ sub fill {
     
     my @entity = $self->get_entity( $coordinate, %options );
     foreach my $key ( keys( %$hashref ) ) {
-        if ( ref( $entity[0] ) eq 'HASH' && defined( $entity[0]->{$key} ) ) {
+        if ( ref( $entity[0] ) eq 'HASH' && exists( $entity[0]->{$key} ) ) {
             $hashref->{$key} = $entity[0]->{$key};
         }
         elsif ( $hashref->{$key} && $hashref->{$key} eq 'Config::Entities::entity' ) {
