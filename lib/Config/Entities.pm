@@ -119,9 +119,11 @@ sub _init {
                     {
                         # export %properties to the entity file
                         local $Config::Entities::properties = $properties;
+                        ## no critic (ProhibitNoStrict)
                         no strict 'vars';
                         local %properties = $properties ? %$properties : ();
                         $entity = do( $File::Find::name );
+                        ## use critic
                     }
                     $logger->warn( 'unable to compile ', $File::Find::name, ': ', $@, "\n" )
                         if ( $@ );
