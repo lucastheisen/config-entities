@@ -2,6 +2,7 @@ my $d = 'efg';
 
 {
     d => $d,
+    hostname => $properties{hostname},
     username => $Config::Entities::properties->{username},
-    password => $Config::Entities::properties->{password}
+    password => $properties{password}
 }

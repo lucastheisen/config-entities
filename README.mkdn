@@ -4,7 +4,7 @@ Config::Entities - An multi-level overridable perl based configuration module
 
 # VERSION
 
-version 1.02
+version 1.03
 
 # SYNOPSIS
 
@@ -38,7 +38,7 @@ version 1.02
     # /project/config/entities
     # |_______________________/a.pm
     # | { 
-    # |     file => $Config::Entities::properties->{base_folder}
+    # |     file => $properties{base_folder}
     # |         . '/sub/folder/file.txt'
     # | }
     my $entities = Config::Entities->new( '/project/config/entities',
@@ -55,7 +55,7 @@ version 1.02
     # |
     # |______________/more_entities
     # |____________________________/d.pm
-    # | { e => $Config::Entities::properties->{f} } 
+    # | { e => $properties{f} } 
     my $entities = Config::Entities->new( 
         '/project/config/entities',
         '/project/config/more_entities',
@@ -67,7 +67,7 @@ version 1.02
     # /project/config
     # |______________/entities
     # |_______________________/a.pm
-    # | { b => $Config::Entities::properties->{e} } 
+    # | { b => $properties{e} } 
     # |
     # |______________/properties.pl
     # | { e => 'f' } 
@@ -116,8 +116,8 @@ representing a sub hash.  If both `Xxx.pm` and a folder `Xxx` are found, the
 `Xxx.pm` will be loaded first then the recursion will enter `Xxx` and merge 
 its results over the top of what is already in the map.  If properties are
 provided via `properties` or `properties_file`, they can be accessed using
-`Config::Entities::properties` in the individual config files.  The currently 
-available options are:
+`%properties` in the individual config files.  The currently available options 
+are:
 
 - entity
 
@@ -126,12 +126,13 @@ available options are:
 
 - properties
 
-    Properties to be loaded into `Config::Entities::properties`.  Will override any
-    properties with the same name loaded by properties\_file.
+    Properties to be loaded into `%properties`.  Will override any properties with 
+    the same name loaded by `properties_file`.
 
 - properties\_file
 
-    A file that will be loaded into `Config::Entities::properties` using `do FILE`
+    A file or array reference of files that will be loaded into `%properties` using 
+    `do FILE`
 
 # METHODS
 
@@ -160,7 +161,7 @@ A simple dotted notation for indexing into the map.  For example,
 
 # AUTHOR
 
-Lucas Theisen &lt;lucastheisen@pastdev.com>
+Lucas Theisen <lucastheisen@pastdev.com>
 
 # COPYRIGHT AND LICENSE
 

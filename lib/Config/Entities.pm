@@ -14,11 +14,17 @@ use Log::Any;
 
 my $logger = Log::Any->get_logger();
 
-our $properties = {};
-
 sub new {
     my ($class, @args) = @_;
     return bless( {}, $class )->_init( @args );
+}
+
+sub _add_properties {
+    my ($self, $properties, $more_properties) = @_;
+
+    foreach my $key ( keys( %{$more_properties} ) ) {
+        $properties->{$key} = $more_properties->{$key};
+    }
 }
 
 sub fill {
@@ -70,15 +76,20 @@ sub _init {
     # all other args are entities roots
     my @entities_roots = @args;
 
+    my $properties = {};
     if ( $options->{properties_file} ) {
-        # merge in properties from a file
-        $properties = do( $options->{properties_file} );
+        # merge in properties from files
+        my @properties_files = ref($options->{properties_file}) eq 'ARRAY'
+            ? @{$options->{properties_file}}
+            : ($options->{properties_file});
+
+        foreach my $properties_file (@properties_files) {
+            $self->_add_properties( $properties, do( $properties_file ) );
+        }
     }
     if ( $options->{properties} ) {
         # merge in direct properties
-        foreach my $key ( keys( %{$options->{properties}} ) ) {
-            $properties->{$key} = $options->{properties}{$key};
-        }
+        $self->_add_properties( $properties, $options->{properties} );
     }
 
     if ( $options->{entity} ) {
@@ -106,7 +117,16 @@ sub _init {
                         }
                     }
                     
-                    my $entity = do( $File::Find::name );
+                    my $entity;
+                    {
+                        # export %properties to the entity file
+                        local $Config::Entities::properties = $properties;
+                        ## no critic (ProhibitNoStrict)
+                        no strict 'vars';
+                        local %properties = $properties ? %$properties : ();
+                        $entity = do( $File::Find::name );
+                        ## use critic
+                    }
                     $logger->warn( 'unable to compile ', $File::Find::name, ': ', $@, "\n" )
                         if ( $@ );
                     _merge( $hashref, $key, $entity );
@@ -193,7 +213,7 @@ __END__
     # /project/config/entities
     # |_______________________/a.pm
     # | { 
-    # |     file => $Config::Entities::properties->{base_folder}
+    # |     file => $properties{base_folder}
     # |         . '/sub/folder/file.txt'
     # | }
     my $entities = Config::Entities->new( '/project/config/entities',
@@ -210,7 +230,7 @@ __END__
     # |
     # |______________/more_entities
     # |____________________________/d.pm
-    # | { e => $Config::Entities::properties->{f} } 
+    # | { e => $properties{f} } 
     my $entities = Config::Entities->new( 
         '/project/config/entities',
         '/project/config/more_entities',
@@ -222,7 +242,7 @@ __END__
     # /project/config
     # |______________/entities
     # |_______________________/a.pm
-    # | { b => $Config::Entities::properties->{e} } 
+    # | { b => $properties{e} } 
     # |
     # |______________/properties.pl
     # | { e => 'f' } 
@@ -269,8 +289,8 @@ representing a sub hash.  If both C<Xxx.pm> and a folder C<Xxx> are found, the
 C<Xxx.pm> will be loaded first then the recursion will enter C<Xxx> and merge 
 its results over the top of what is already in the map.  If properties are
 provided via C<properties> or C<properties_file>, they can be accessed using
-C<Config::Entities::properties> in the individual config files.  The currently 
-available options are:
+C<%properties> in the individual config files.  The currently available options 
+are:
 
 =over 4
 
@@ -281,12 +301,13 @@ C<$entities_root_dir>'s that are passed in.
 
 =item properties
 
-Properties to be loaded into C<Config::Entities::properties>.  Will override any
-properties with the same name loaded by properties_file.
+Properties to be loaded into C<%properties>.  Will override any properties with 
+the same name loaded by C<properties_file>.
 
 =item properties_file
 
-A file that will be loaded into C<Config::Entities::properties> using C<do FILE>
+A file or array reference of files that will be loaded into C<%properties> using 
+C<do FILE>
 
 =back
 

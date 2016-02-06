@@ -19,6 +19,7 @@ is_deeply( Config::Entities->new( "$test_dir/local_entities" ),
     {
         b => {
             d => 'efg',
+            hostname => undef,
             username => undef,
             password => undef
         }
@@ -33,6 +34,7 @@ is_deeply( $entities,
     {
         b => {
             d => 'efg',
+            hostname => undef,
             username => 'user',
             password => 'pass' 
         }
@@ -41,12 +43,16 @@ is_deeply( $entities,
 
 $entities = Config::Entities->new( "$test_dir/local_entities", 
     { 
-        properties_file => "$test_dir/config.pl"
+        properties_file => [
+            "$test_dir/config.pl",
+            "$test_dir/env.pl"
+        ]
     } );
 is_deeply( $entities,
     {
         b => {
             d => 'efg',
+            hostname => 'me.example.com',
             username => 'file_user',
             password => 'file_pass' 
         }
@@ -62,6 +68,7 @@ is_deeply( $entities,
     {
         b => {
             d => 'efg',
+            hostname => undef,
             username => 'override_user',
             password => 'file_pass' 
         }
@@ -81,6 +88,7 @@ is_deeply( $entities,
         b => {
             c => 1,
             d => 'efg',
+            hostname => undef,
             username => 'override_user',
             password => 'file_pass' 
         },
