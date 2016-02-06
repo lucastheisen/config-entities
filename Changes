@@ -1,5 +1,9 @@
 Revision history for Perl module Template::Resolver
 
+1.04 2016-02-06
+    - Cleaned up prereqs
+    - Fixed minor bug in get_entity  with empty coordinate
+
 1.03 2016-01-26
     - Exported %properties to the entities files for property placeholders
     - Added support for multiple properties files by allowing properties-file to be an array ref
