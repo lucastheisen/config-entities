@@ -49,10 +49,12 @@ sub get_entity {
     my ($self, $coordinate, %options) = @_;
     
     my @result = ($self);
-    foreach my $coordinate_part ( split( /\./, $coordinate ) ) {
-        my $child = $result[0]->{$coordinate_part};
-        return if ( ! $child );
-        unshift( @result, $child );
+    if ($coordinate) {
+        foreach my $coordinate_part ( split( /\./, $coordinate ) ) {
+            my $child = $result[0]->{$coordinate_part};
+            return if ( ! $child );
+            unshift( @result, $child );
+        }
     }
     return $options{ancestry} ? @result : shift( @result );
 }
