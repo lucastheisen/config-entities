@@ -4,7 +4,7 @@ Config::Entities - An multi-level overridable perl based configuration module
 
 # VERSION
 
-version 1.04
+version 1.05
 
 # SYNOPSIS
 
@@ -135,6 +135,11 @@ are:
     `do FILE`
 
 # METHODS
+
+## as\_hashref
+
+Will return a hashref representation of the current entities.  It will be a deep
+copy so changes to the hash will not affect the entities object.
 
 ## fill( $coordinate, $hashref, \[%options\] )
 

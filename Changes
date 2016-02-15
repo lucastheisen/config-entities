@@ -1,5 +1,8 @@
 Revision history for Perl module Template::Resolver
 
+1.05 2016-02-15
+    - Added as_hashref
+
 1.04 2016-02-06
     - Cleaned up prereqs
     - Fixed minor bug in get_entity  with empty coordinate

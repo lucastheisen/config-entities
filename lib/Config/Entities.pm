@@ -19,6 +19,33 @@ sub new {
     return bless( {}, $class )->_init( @args );
 }
 
+sub as_hashref {
+    return _copy(@_);
+}
+
+sub _copy {
+    my ($value) = @_;
+
+    my $ref = ref($value);
+    if ($ref) {
+        if ($ref eq 'ARRAY') {
+            return [map {_copy($_)} @$value];
+        }
+        elsif ($ref eq 'HASH' || $value->isa('Config::Entities')) {
+            return {map {$_ => _copy($value->{$_})} keys(%$value)};
+        }
+        elsif ($ref eq 'SCALAR') {
+            return $value;
+        }
+        else {
+            croak("unsupported type '$ref'");
+        }
+    }
+    else {
+        return $value;
+    }
+}
+
 sub _add_properties {
     my ($self, $properties, $more_properties) = @_;
 
@@ -310,6 +337,11 @@ A file or array reference of files that will be loaded into C<%properties> using
 C<do FILE>
 
 =back
+
+=method as_hashref
+
+Will return a hashref representation of the current entities.  It will be a deep
+copy so changes to the hash will not affect the entities object.
 
 =method fill( $coordinate, $hashref, [%options] )
 
