@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 BEGIN { use_ok( 'Config::Entities' ) }
 
@@ -212,3 +212,72 @@ is_deeply(
     $entities->as_hashref(),
     $entity,
     'as hash');
+    
+$entity = {
+    default => {
+        hostname => 'localhost',
+        tomcat => {
+            'Config::Entities::inherit' => ['hostname'],
+            port => 8080,
+            service => {
+                command => '/opt/tomcat/bin/catalina.sh',
+                pid_file => '/var/run/tomcat/catalina.pid'
+            }
+        }
+    },
+    dev => {
+        foo => {
+            'Config::Entities::inherit' => [
+                {
+                    coordinate => 'default.tomcat', 
+                    as => 'foo_tomcat',
+                    using => {
+                        port => 9080,
+                        service => {
+                            pid_file => '/opt/tomcat/bin/.catalina.pid'
+                        }
+                    }
+                },
+                {name => 'hostname', as => 'default_hostname'},
+                'os'
+            ],
+            hostname => 'foo.pastdev.com',
+        },
+        hostname => 'dev.app', 
+        os => 'linux'
+    }
+};
+$entities = Config::Entities->new({entity => $entity});
+is_deeply(
+    $entities->as_hashref(),
+    {
+        default => {
+            hostname => 'localhost',
+            tomcat => {
+                hostname => 'localhost',
+                port => 8080,
+                service => {
+                    command => '/opt/tomcat/bin/catalina.sh',
+                    pid_file => '/var/run/tomcat/catalina.pid'
+                }
+            }
+        },
+        dev => {
+            foo => {
+                default_hostname => 'dev.app',
+                foo_tomcat => {
+                    hostname => 'localhost',
+                    port => 9080,
+                    service => {
+                        command => '/opt/tomcat/bin/catalina.sh',
+                        pid_file => '/opt/tomcat/bin/.catalina.pid'
+                    }
+                },
+                hostname => 'foo.pastdev.com',
+                os => 'linux'
+            },
+            hostname => 'dev.app',
+            os => 'linux'
+        }
+    },
+    'craziness!');

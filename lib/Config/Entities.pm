@@ -162,26 +162,79 @@ sub _init {
             map { Cwd::abs_path( $_ ) } @entities_roots );
     }
 
-    _inherit( undef, $self );
+    &$_($self) foreach $self->_inherit( undef, $self );
 
     return $self;
 }
 
 sub _inherit {
-    my ($parent, $child) = @_;
-    if ( $child && (ref( $child ) eq 'HASH' || ref( $child ) eq 'Config::Entities') ) {
-        if ( $parent && $child->{'Config::Entities::inherit'} ) {
-            my $inherit = delete( $child->{'Config::Entities::inherit'} );
-            if ( $inherit ) {
-                foreach my $key ( @$inherit ) {
-                    if ( defined( $parent->{$key} ) ) {
-                        $child->{$key} = $parent->{$key} unless ( defined( $child->{$key} ) );
-                    }
+    my ($self, $parent, $child) = @_;
+
+    my @after_inherit = ();
+    if ( $child ) {
+        my $ref = ref( $child );
+        if ( $ref eq 'HASH' || $ref eq 'Config::Entities' ) {
+            if ( $parent && $child->{'Config::Entities::inherit'} ) {
+                push( @after_inherit, 
+                    $self->_inherit_each(
+                        delete( $child->{'Config::Entities::inherit'} ),
+                        $parent,
+                        $child ) );
+            }
+            push( @after_inherit, $self->_inherit( $child, $child->{$_} ) ) 
+                foreach keys( %$child );
+        }
+    }
+    return @after_inherit;
+}
+
+sub _inherit_each {
+    my ($self, $inherit, $parent, $child) = @_;
+
+    my @after_inherit = ();
+    if ( ref( $inherit ) eq 'ARRAY' ) {
+        foreach my $spec ( @$inherit ) {
+            my $spec_ref = ref($spec);
+            if ( $spec_ref ) {
+                if ( $spec_ref eq 'HASH' ) {
+                    push( @after_inherit, 
+                        $self->_inherit_spec( $spec, $parent, $child ) );
+                }
+                else {
+                    croak( 'invalid inherit' );
                 }
             }
+            elsif ( defined( $parent->{$spec} ) ) {
+                $child->{$spec} = $parent->{$spec} 
+                    unless ( defined( $child->{$spec} ) );
+            }
         }
-        _inherit( $child, $child->{$_} ) foreach keys( %$child );
     }
+    return @after_inherit;
+}
+
+sub _inherit_spec {
+    my ($self, $spec, $parent, $child) = @_;
+
+    if ( $spec->{name} ) {
+        my $as = $spec->{as} || $spec->{name};
+        $child->{$as} = $parent->{$spec->{name}} 
+            unless ( defined( $child->{$as} ) );
+    }
+    elsif ( $spec->{coordinate} ) {
+        my $as = $spec->{as};
+        unless ( $as ) {
+            $as = $spec->{coordinate};
+            $as =~ s/^.*\.//;
+        }
+
+        return sub { 
+            my ($entities) = @_;
+            $child->{$as} = _copy( $entities->get_entity( $spec->{coordinate} ) );
+            _merge($child, $as, $spec->{using}) if ( $spec->{using} );
+        };
+    }
+    return;
 }
 
 sub _merge {
