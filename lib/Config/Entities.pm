@@ -85,7 +85,7 @@ sub get_entity {
     if ($coordinate) {
         foreach my $coordinate_part ( split( /\./, $coordinate ) ) {
             my $child = $result[0]->{$coordinate_part};
-            return if ( ! $child );
+            return if ( ! defined($child) );
             unshift( @result, $child );
         }
     }
